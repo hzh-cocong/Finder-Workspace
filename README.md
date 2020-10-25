@@ -8,7 +8,7 @@ A alfred workflow for the Finder that save folder path to the file and restore t
 
 First, input the command ***save*** with Alfred and enter.
 
-![](docs/images/save command.png)
+![](./docs/images/save command.png)
 
 Second, choose the path and input the file name.
 
