@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>finder.workspace.cocong.cn</string>
+	<key>category</key>
+	<string>Share</string>
+	<key>connections</key>
+	<dict>
+		<key>203FF2A6-BBED-4374-BBA0-7346B7E4C389</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>F0469B82-A2D1-444D-9C55-82DFC91403A5</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>D97234CC-4D00-4B8D-A115-5919C89B2B02</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>097910A9-1875-4779-9359-530BE0CC763B</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>hzh</string>
+	<key>description</key>
+	<string>Save folder path to the file and restore the window quickly next time.</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Finder Workspace</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>openwith</key>
+				<string></string>
+				<key>sourcefile</key>
+				<string></string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openfile</string>
+			<key>uid</key>
+			<string>097910A9-1875-4779-9359-530BE0CC763B</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>anchorfields</key>
+				<false/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>daterange</key>
+				<integer>0</integer>
+				<key>fields</key>
+				<array>
+					<dict>
+						<key>field</key>
+						<string>kMDItemDisplayName</string>
+						<key>not</key>
+						<false/>
+						<key>split</key>
+						<true/>
+						<key>value</key>
+						<string>{query}</string>
+						<key>words</key>
+						<false/>
+					</dict>
+					<dict>
+						<key>field</key>
+						<string>kMDItemDisplayName</string>
+						<key>not</key>
+						<false/>
+						<key>split</key>
+						<false/>
+						<key>value</key>
+						<string>*.finder.applescript</string>
+						<key>words</key>
+						<true/>
+					</dict>
+				</array>
+				<key>includesystem</key>
+				<false/>
+				<key>keyword</key>
+				<string>finder</string>
+				<key>limit</key>
+				<integer>0</integer>
+				<key>runningsubtext</key>
+				<string></string>
+				<key>scopes</key>
+				<array>
+					<string>~</string>
+				</array>
+				<key>sortmode</key>
+				<integer>0</integer>
+				<key>subtext</key>
+				<string>*{query}*.finder.applescript</string>
+				<key>title</key>
+				<string>Find Finder Workspace File like below</string>
+				<key>types</key>
+				<array>
+					<string>com.apple.applescript.text</string>
+				</array>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.filefilter</string>
+			<key>uid</key>
+			<string>D97234CC-4D00-4B8D-A115-5919C89B2B02</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>save</string>
+				<key>subtext</key>
+				<string></string>
+				<key>text</key>
+				<string>Save folder path to the file.</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>203FF2A6-BBED-4374-BBA0-7346B7E4C389</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>applescript</key>
+				<string>-- function: save data to the file
+on write_to_file(this_data, target_file, append_data) -- (string, file path as string, boolean)
+    try
+        set the target_file to the target_file as text
+        set the open_target_file to open for access file target_file with write permission
+        if append_data is false then set eof of the open_target_file to 0
+        write this_data to the open_target_file starting at eof
+        close access the open_target_file
+        return true
+    on error
+        try
+            close access file target_file
+        end try
+        return false
+    end try
+end write_to_file
+
+on alfred_script(q)
+    -- get the window path
+    set dirs to {}
+    tell application "Finder"
+        set _windows to windows
+        repeat with _window in _windows
+            set _properties to properties of _window
+            set _folder to target of _properties
+            set _path to _folder as alias
+            set _path to POSIX path of _path
+            set dirs to dirs &amp; {_path}
+        end repeat
+    end tell
+
+    -- process path
+    set string_dirs to ""
+    set i to 1
+    repeat with dir in dirs
+        if i = 1 then
+            set string_dirs to "\"" &amp; dir &amp; "\""
+        else
+            set string_dirs to string_dirs &amp; "," &amp; "\"" &amp; dir &amp; "\""
+        end if
+        
+        set i to i + 1
+    end repeat
+
+    -- generate code
+    set code to "
+    set paths to {" &amp; string_dirs &amp; "}
+    set _length to get the length of paths
+
+    tell application \"Finder\"
+        activate
+        set _window to make new Finder window
+        select _window
+
+        set i to 1
+        repeat with _path in paths
+            delay 0.1
+
+            set target of front window to (_path as POSIX file)
+
+            if i &lt; _length then
+                tell application \"System Events\"
+                    tell application process \"Finder\" to set frontmost to true
+                    keystroke \"t\" using command down
+                end tell
+            end if
+
+            set i to i + 1
+        end repeat
+    end tell
+    "
+
+    -- choose file name
+    set _prompt to "Finder Workspace"
+    choose file name with prompt _prompt default name "" default location file "Macintosh HD:Users:hzh:Downloads"
+    set _path to the result
+
+    -- append the number if the file is exists
+    tell application "Finder"
+        set _path_with_type to _path &amp; ".finder.applescript"
+        set i to 2
+        repeat while i &lt; 10 and (exists _path_with_type as text)
+            set _path_with_type to _path &amp; "(" &amp; i &amp; ")" &amp; ".finder.applescript"
+            set i to i + 1
+        end repeat
+        if i is 10 and (exists _path_with_type as text) then
+            display dialog "File name conflict"
+            error number -128
+        end if
+    end tell
+
+    -- save code to the file
+    write_to_file(code, _path_with_type, false)
+  
+end alfred_script</string>
+				<key>cachescript</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.applescript</string>
+			<key>uid</key>
+			<string>F0469B82-A2D1-444D-9C55-82DFC91403A5</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>A alfred workflow for the Finder that save folder path to the file and restore the window quickly next time.
+More see https://github.com/hzh-cocong/Finder-Workspace</string>
+	<key>uidata</key>
+	<dict>
+		<key>097910A9-1875-4779-9359-530BE0CC763B</key>
+		<dict>
+			<key>note</key>
+			<string>2. Pressing the Return key opens the folder you selected.</string>
+			<key>xpos</key>
+			<integer>395</integer>
+			<key>ypos</key>
+			<integer>120</integer>
+		</dict>
+		<key>203FF2A6-BBED-4374-BBA0-7346B7E4C389</key>
+		<dict>
+			<key>xpos</key>
+			<integer>115</integer>
+			<key>ypos</key>
+			<integer>365</integer>
+		</dict>
+		<key>D97234CC-4D00-4B8D-A115-5919C89B2B02</key>
+		<dict>
+			<key>note</key>
+			<string>1. This File Filter is set to present folders only, so type "f" followed by the name of your folder. The scope is set to home folder only.</string>
+			<key>xpos</key>
+			<integer>120</integer>
+			<key>ypos</key>
+			<integer>120</integer>
+		</dict>
+		<key>F0469B82-A2D1-444D-9C55-82DFC91403A5</key>
+		<dict>
+			<key>xpos</key>
+			<integer>395</integer>
+			<key>ypos</key>
+			<integer>365</integer>
+		</dict>
+	</dict>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>1.0.0</string>
+	<key>webaddress</key>
+	<string>http://www.cocong.cn</string>
+</dict>
+</plist>
